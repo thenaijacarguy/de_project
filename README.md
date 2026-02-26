@@ -185,7 +185,7 @@ Check that all containers are running: `docker ps`
 Check scheduler logs: `docker-compose logs airflow-scheduler | tail -30`
 
 **Connection refused errors**
-Scripts running locally use localhost with external ports (5433, 5434).
+Scripts running locally use localhost with external ports (5435, 5434).
 Scripts running inside Airflow use container names (source_db, warehouse_db) on port 5432.
 Check your .env and docker-compose.yml environment overrides.
 
