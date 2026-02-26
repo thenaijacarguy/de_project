@@ -83,7 +83,7 @@ docker-compose up -d
 ```
 
 This starts:
-- `source_db` on port 5433 — transactional source database
+- `source_db` on port 5435 — transactional source database
 - `warehouse_db` on port 5434 — data warehouse
 - `airflow_db` on port 5432 — Airflow metadata database
 - `airflow-scheduler` — DAG scheduler
