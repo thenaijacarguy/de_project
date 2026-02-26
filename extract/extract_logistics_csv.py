@@ -8,9 +8,7 @@ load_dotenv()
 
 def get_wh_connection():
     """
-    Same helper pattern as before — create and return a warehouse connection.
-    We only connect to the warehouse here because CSV files aren't a database;
-    we read them with pandas directly from the filesystem.
+    create and return a warehouse connection.
     """
     return psycopg2.connect(
         host=os.getenv("WAREHOUSE_DB_HOST"),
@@ -43,7 +41,7 @@ def ensure_shipments_table(wh_conn):
         )
     """)
     # Notice we added a 'source_file' column that doesn't exist in the CSV.
-    # This is a common pattern — adding metadata columns that help with
+    # This is a common pattern: adding metadata columns that help with
     # debugging and auditing. If a row looks wrong, you know exactly which
     # file it came from.
     wh_conn.commit()
@@ -54,13 +52,12 @@ def extract_csv(file_path, wh_conn):
     """
     Reads a single CSV file and loads all its rows into raw.shipments.
 
-    file_path = path to the CSV file, e.g. "data/csv/shipments_20240115.csv"
+    file_path = path to the CSV file,"data/csv/shipments.csv"
     wh_conn   = warehouse connection
     """
     print(f"  Reading file: {file_path}")
 
     # Check the file actually exists before trying to read it.
-    # In production, you'd check an SFTP server here instead.
     if not os.path.exists(file_path):
         print(f"  ⚠️  File not found: {file_path} — skipping")
         return
@@ -96,7 +93,7 @@ def extract_csv(file_path, wh_conn):
     already_loaded = cur.fetchone()[0] > 0
 
     if already_loaded:
-        print(f"  ⏭️  Already loaded — skipping {os.path.basename(file_path)}")
+        print(f"  Already loaded — skipping {os.path.basename(file_path)}")
         cur.close()
         return
 
@@ -109,7 +106,7 @@ def extract_csv(file_path, wh_conn):
     )
     wh_conn.commit()
 
-    print(f"  ✅ Loaded {len(df)} rows from {os.path.basename(file_path)}")
+    print(f"  Loaded {len(df)} rows from {os.path.basename(file_path)}")
     cur.close()
 
 
@@ -119,7 +116,6 @@ if __name__ == "__main__":
     wh_conn = get_wh_connection()
     ensure_shipments_table(wh_conn)
 
-    # In a real pipeline, you'd scan an SFTP folder for all new files.
     # Here we just specify our sample file directly.
     csv_files = ["data/csv/shipment.csv"]
 
@@ -127,4 +123,4 @@ if __name__ == "__main__":
         extract_csv(f, wh_conn)
 
     wh_conn.close()
-    print("\n✅ Logistics CSV extraction complete.")
+    print("\n Logistics CSV extraction complete.")

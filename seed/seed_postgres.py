@@ -100,6 +100,6 @@ for i in range(1, 501):
             (iid, oid, pid, qty, price)
         )
 
-print("✅ Source database seeded: 200 customers, 50 products, 500 orders")
+print(" Source database seeded: 200 customers, 50 products, 500 orders")
 cur.close()
 conn.close()

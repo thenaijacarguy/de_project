@@ -3,7 +3,7 @@
 ## raw schema
 
 Unmodified source data. All columns stored as TEXT.
-Never modify these tables directly — they are overwritten on each run.
+Never modify these tables directly, they are overwritten on each run.
 
 ### raw.orders
 Source: PostgreSQL transactional database
@@ -135,7 +135,7 @@ Query these tables directly for reporting and analysis.
 
 ### marts.fact_sales
 Grain: one row per order line item.
-This is the central table — join to dimension tables for context.
+This is the central table, join to dimension tables for context.
 
 | Column | Type | Description |
 |--------|------|-------------|

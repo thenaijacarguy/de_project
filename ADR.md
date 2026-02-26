@@ -2,14 +2,14 @@
 
 An ADR documents significant design decisions made during the project,
 the context that led to them, and the trade-offs involved. Future
-engineers (or future you) can read this to understand *why* the
+engineers can read this to understand *why* the
 pipeline works the way it does, not just *how*.
 
 ---
 
 ## ADR-001: Star Schema for the Marts Layer
 
-**Date:** 2024-01-15
+**Date:** 2026-02-26
 **Status:** Accepted
 
 ### Context
@@ -24,17 +24,17 @@ separate dimension tables (dim_customers, dim_products, dim_date).
 ### Reasons
 - Star schemas are the industry standard for analytical workloads and
   are what most BI tools (Tableau, Power BI, Looker) are optimised for
-- Queries are simple to write — analysts join fact to one dimension at
+- Queries are simple to write, analysts join fact to one dimension at
   a time rather than navigating a complex relational model
 - Dimension tables give a single source of truth for descriptive
-  attributes — customer region is defined once in dim_customers,
+  attributes, customer region is defined once in dim_customers,
   not repeated in every fact row
-- Performance is predictable — the fact table is wide and flat,
+- Performance is predictable, the fact table is wide and flat,
   making aggregations fast
 
 ### Trade-offs
 - Changes to dimension attributes (e.g. a customer moving region)
-  require a decision about history — we chose SCD Type 1 (overwrite)
+  require a decision about history, we chose SCD Type 1 (overwrite)
   for simplicity, which means we lose historical attribute values
 - A star schema requires more upfront design thinking than a flat table
 
@@ -42,7 +42,7 @@ separate dimension tables (dim_customers, dim_products, dim_date).
 
 ## ADR-002: Full Refresh vs Incremental Loading
 
-**Date:** 2024-01-15
+**Date:** 2026-02-26
 **Status:** Accepted
 
 ### Context
@@ -55,7 +55,7 @@ We use **full refresh** for small dimension tables (customers, products)
 and **idempotent append** for event tables (shipments, campaigns).
 
 ### Reasons
-- Full refresh is simpler to implement and debug — there is no watermark
+- Full refresh is simpler to implement and debug: there is no watermark
   logic to maintain and no risk of missing records due to an incorrect
   high-water mark
 - For small tables (< 10,000 rows) the performance difference between
@@ -68,7 +68,7 @@ and **idempotent append** for event tables (shipments, campaigns).
   millions of rows, full refresh would be too slow and expensive.
   The correct solution at that scale would be CDC (Change Data Capture)
   using a tool like Debezium to stream only changed rows
-- Incremental loading requires careful watermark management — getting
+- Incremental loading requires careful watermark management, getting
   the high-water mark wrong means either missing data or loading
   duplicates, both of which are hard to detect
 
@@ -76,12 +76,12 @@ and **idempotent append** for event tables (shipments, campaigns).
 
 ## ADR-003: Storing Raw API Responses as JSON
 
-**Date:** 2024-01-15
+**Date:** 2026-02-26
 **Status:** Accepted
 
 ### Context
 When extracting from the marketing API we had two options for what to
-store in the raw layer — parse the JSON immediately into columns, or
+store in the raw layer: parse the JSON immediately into columns, or
 store the entire response as a raw JSON string.
 
 ### Decision
@@ -93,13 +93,13 @@ raw.campaigns, and unpack it into columns only in the dbt staging model.
   the original data and can reprocess it with an updated staging model.
   If we had parsed at extraction time, a schema change would require
   re-fetching all historical data from the API
-- The raw layer's job is to be a faithful copy of the source — parsing
+- The raw layer's job is to be a faithful copy of the source, parsing
   is a transformation and belongs in the staging layer
-- JSON storage makes the extraction script simpler and less brittle —
+- JSON storage makes the extraction script simpler and less brittle,
   it doesn't need to know anything about the response structure
 
 ### Trade-offs
-- Raw JSON is not queryable without parsing — analysts cannot query
+- Raw JSON is not queryable without parsing, analysts cannot query
   raw.campaigns directly and get meaningful results
 - JSON blobs use more storage than typed columns, though this is
   negligible at our data volumes

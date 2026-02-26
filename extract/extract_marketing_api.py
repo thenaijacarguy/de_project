@@ -23,7 +23,7 @@ def ensure_campaigns_table(wh_conn):
     """
     Creates the raw campaigns table if it doesn't exist.
     Notice we store the entire API response as a single JSON text column.
-    This is called 'raw JSON storage' — we preserve the exact API response
+    This is called 'raw JSON storage': we preserve the exact API response
     so if the schema changes later or we need to re-process, we have the
     original data. The staging layer will unpack the JSON into proper columns.
     """
@@ -155,9 +155,7 @@ if __name__ == "__main__":
     wh_conn = get_wh_connection()
     ensure_campaigns_table(wh_conn)
 
-    # Extract for today. In a real daily pipeline, Airflow would pass
-    # in the execution date automatically. For now we hardcode today.
     extract_campaigns(date.today(), wh_conn)
 
     wh_conn.close()
-    print("\n✅ Marketing API extraction complete.")
+    print("\n Marketing API extraction complete.")

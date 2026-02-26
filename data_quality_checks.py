@@ -20,7 +20,7 @@ def log_result(cur, check_name, status, details, rows_checked=None, threshold=No
     """
     Writes the result of a single quality check to the audit table.
 
-    We call this after every check — whether it passed or failed.
+    We call this after every check, whether it passed or failed.
     Having a complete history means you can look back and see exactly
     when a data issue first appeared, which is invaluable for debugging.
 
@@ -47,13 +47,9 @@ def check_row_counts(conn):
     CHECK 1: Row count validation.
 
     Verifies that fact_sales has a meaningful number of rows.
-    A sudden drop in row count is one of the most common silent failures —
+    A sudden drop in row count is one of the most common silent failures,
     it usually means an extraction script failed quietly or a JOIN
     accidentally filtered out most of the data.
-
-    In production you'd compare against yesterday's count stored in the
-    audit table. Here we check against a minimum absolute threshold
-    to keep things simple.
     """
     cur = conn.cursor()
 
@@ -87,12 +83,10 @@ def check_null_rates(conn):
     """
     CHECK 2: Null rate validation.
 
-    Critical columns in fact_sales must never be null — a null customer_id
+    Critical columns in fact_sales must never be null, a null customer_id
     or null line_revenue would make the row useless for analysis.
 
     We check each critical column and fail if any of them have nulls.
-    In production you might allow a small tolerance (e.g. < 1%) for
-    optional fields, but for primary keys and measures, zero nulls is the rule.
     """
     cur = conn.cursor()
 
@@ -145,13 +139,12 @@ def check_referential_integrity(conn):
     Every customer_id in fact_sales must exist in dim_customers.
     Every product_id in fact_sales must exist in dim_products.
 
-    'Orphaned' foreign keys — IDs that exist in the fact table but not
-    in the dimension — cause silent gaps in reports. A sale attributed
+    'Orphaned' foreign keys: IDs that exist in the fact table but not
+    in the dimension, cause silent gaps in reports. A sale attributed
     to a customer that doesn't exist in dim_customers simply won't appear
     in any customer-level analysis. This check catches that.
 
-    We use a LEFT JOIN and look for NULLs on the dimension side —
-    that's the standard SQL pattern for finding rows with no match.
+    We use a LEFT JOIN and look for NULLs on the dimension side
     """
     cur = conn.cursor()
     all_passed = True
@@ -209,11 +202,9 @@ def check_data_freshness(conn):
 
     The most recent order_date in fact_sales should be within 2 days
     of today. If it's older than that, it means extraction probably
-    failed silently — the pipeline ran but pulled stale or no data.
+    failed silently, the pipeline ran but pulled stale or no data.
 
-    This is one of the most practically useful checks. In production,
-    an analyst looking at a dashboard has no way of knowing the data
-    is 5 days old unless something explicitly checks and alerts on it.
+    However, for the purpose of this project, we'll relax it to 500 days.
     """
     cur = conn.cursor()
 
@@ -255,7 +246,7 @@ def check_revenue_sanity(conn):
     CHECK 5: Revenue sanity check.
 
     Checks that no individual order item has a suspiciously high revenue
-    value — specifically, nothing more than 10x the average line revenue.
+    value, specifically, nothing more than 10x the average line revenue.
 
     This catches data entry errors like a unit price accidentally recorded
     as 100,000 instead of 100. These outliers don't break the pipeline
@@ -299,7 +290,7 @@ def run_all_checks():
     Runs every check in sequence and summarises the results.
 
     Returns True if all checks passed, False if any failed.
-    The Airflow DAG (Phase 5) will use this return value to decide
+    The Airflow DAG will use this return value to decide
     whether to send a success or failure notification.
     """
     print("\nRunning data quality checks...")

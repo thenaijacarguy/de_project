@@ -19,6 +19,6 @@ cur.execute("CREATE SCHEMA IF NOT EXISTS raw;")       # untouched source copies
 cur.execute("CREATE SCHEMA IF NOT EXISTS staging;")   # cleaned, typed tables
 cur.execute("CREATE SCHEMA IF NOT EXISTS marts;")     # star schema for analytics
 
-print("✅ Schemas created: raw, staging, marts")
+print("Schemas created: raw, staging, marts")
 cur.close()
 conn.close()

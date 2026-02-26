@@ -29,7 +29,7 @@ def ensure_raw_table_exists(wh_conn, table_name, source_conn):
     it creates it automatically by copying the column structure from
     the source table.
 
-    This is called 'schema inference' — we don't hardcode the column
+    This is called 'schema inference': we don't hardcode the column
     definitions, we let Postgres tell us what columns exist in the source.
 
     wh_conn     = connection to your warehouse database
@@ -73,7 +73,7 @@ def extract_table(table_name, source_conn, wh_conn):
     3. Reads all rows from the source table into a pandas DataFrame
     4. Writes those rows into the warehouse raw table
 
-    We're doing a 'full refresh' here — truncate and reload everything
+    We're doing a 'full refresh' here: truncate and reload everything
     each run. For small tables (customers, products) this is fine.
     For very large tables in production you'd use incremental loading
     (only pull new/changed rows), but full refresh is simpler to start.
@@ -104,7 +104,7 @@ def extract_table(table_name, source_conn, wh_conn):
     
     wh_conn.commit()
 
-    print(f"  ✅ {table_name}: {len(df)} rows loaded into raw.{table_name}")
+    print(f"   {table_name}: {len(df)} rows loaded into raw.{table_name}")
     wh_cur.close()
 
 
@@ -137,4 +137,4 @@ if __name__ == "__main__":
     source_conn.close()
     wh_conn.close()
 
-    print("\n✅ PostgreSQL extraction complete.")
+    print("\n PostgreSQL extraction complete.")
