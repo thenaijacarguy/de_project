@@ -1,0 +1,102 @@
+x-airflow-common:
+  &airflow-common
+  build: .
+  env_file:
+    - .env                              # ← load ALL .env variables into every
+  environment:                          #   Airflow container automatically
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_DB_USER}:${AIRFLOW_DB_PASS}@airflow_db/${AIRFLOW_DB_NAME}
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__FERNET_KEY: ''
+    # Override the host/port for Airflow — it talks to DBs via Docker
+    # network (container names), not via localhost like your local scripts
+    SOURCE_DB_HOST: ${DOCKER_SOURCE_DB_HOST}
+    SOURCE_DB_PORT: ${DOCKER_SOURCE_DB_PORT}
+    WAREHOUSE_DB_HOST: ${DOCKER_WH_DB_HOST}
+    WAREHOUSE_DB_PORT: ${DOCKER_WH_DB_PORT}
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./:/opt/airflow/project
+  depends_on:
+    airflow_db:
+      condition: service_healthy
+
+services:
+  source_db:
+    image: postgres:15
+    container_name: source_db
+    environment:
+      POSTGRES_DB: ${SOURCE_DB_NAME}
+      POSTGRES_USER: ${SOURCE_DB_USER}
+      POSTGRES_PASSWORD: ${SOURCE_DB_PASS}
+    ports:
+      - "${SOURCE_DB_PORT}:5432"
+    volumes:
+      - source_data:/var/lib/postgresql/data
+
+  warehouse_db:
+    image: postgres:15
+    container_name: warehouse_db
+    environment:
+      POSTGRES_DB: ${WAREHOUSE_DB_NAME}
+      POSTGRES_USER: ${WAREHOUSE_DB_USER}
+      POSTGRES_PASSWORD: ${WAREHOUSE_DB_PASS}
+    ports:
+      - "${WAREHOUSE_DB_PORT}:5432"
+    volumes:
+      - warehouse_data:/var/lib/postgresql/data
+
+  airflow_db:
+    image: postgres:15
+    container_name: airflow_db
+    environment:
+      POSTGRES_DB: ${AIRFLOW_DB_NAME}
+      POSTGRES_USER: ${AIRFLOW_DB_USER}
+      POSTGRES_PASSWORD: ${AIRFLOW_DB_PASS}
+    volumes:
+      - airflow_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${AIRFLOW_DB_USER}"]
+      interval: 5s
+      retries: 5
+
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow_init
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db migrate &&
+        airflow users create \
+          --username admin \
+          --password admin \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email admin@example.com
+    restart: "no"
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow_scheduler
+    command: scheduler
+    restart: always
+    depends_on:
+      - airflow-init
+
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow_webserver
+    command: webserver
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - airflow-init
+
+volumes:
+  source_data:
+  warehouse_data:
+  airflow_db_data:

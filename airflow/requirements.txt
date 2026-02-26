@@ -1,0 +1,6 @@
+psycopg2-binary
+pandas
+requests
+python-dotenv
+dbt-core
+dbt-postgres

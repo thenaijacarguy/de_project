@@ -1,0 +1,12 @@
+de_project:
+  outputs:
+    dev:
+      dbname: warehouse
+      host: warehouse_db
+      pass: warehouse_pass
+      port: 5432
+      schema: public
+      threads: 1
+      type: postgres
+      user: warehouse_user
+  target: dev

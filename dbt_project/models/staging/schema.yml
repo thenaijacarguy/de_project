@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: stg_customers
+    columns:
+      - name: customer_id
+        tests:
+          - unique          # no two customers can have the same ID
+          - not_null        # customer_id must always have a value
+      - name: email
+        tests:
+          - not_null
+      - name: region
+        tests:
+          # accepted_values checks the column only contains these values.
+          # Any other value fails the test — useful for catching typos.
+          - accepted_values:
+              values: ['North', 'South', 'East', 'West']
+
+  - name: stg_orders
+    columns:
+      - name: order_id
+        tests:
+          - unique
+          - not_null
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['completed', 'shipped', 'cancelled']
+
+  - name: stg_order_items
+    columns:
+      - name: item_id
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        tests:
+          - not_null
+          # relationships checks referential integrity:
+          # every order_id in stg_order_items must exist in stg_orders.
+          # This catches orphaned rows — items with no parent order.
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+
+  - name: stg_products
+    columns:
+      - name: product_id
+        tests:
+          - unique
+          - not_null

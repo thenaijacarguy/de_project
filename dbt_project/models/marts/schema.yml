@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: fact_sales
+    columns:
+      - name: fact_id
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+      - name: product_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_products')
+              field: product_id
+      - name: quantity
+        tests:
+          - not_null
+      - name: line_revenue
+        tests:
+          - not_null
+
+  - name: dim_customers
+    columns:
+      - name: customer_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_products
+    columns:
+      - name: product_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_date
+    columns:
+      - name: date_id
+        tests:
+          - unique
+          - not_null
