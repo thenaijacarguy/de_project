@@ -4,9 +4,9 @@
 ```mermaid
 flowchart TD
     subgraph Sources
-        A[(PostgreSQL\nSource DB)]
-        B[CSV Files\nSFTP Drop]
-        C[Marketing\nREST API]
+        A[(PostgreSQL<br/>Source DB)]
+        B[CSV Files<br/>SFTP Drop]
+        C[Marketing<br/>REST API]
     end
 
     subgraph raw schema
